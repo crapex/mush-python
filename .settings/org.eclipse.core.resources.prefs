@@ -1,0 +1,17 @@
+eclipse.preferences.version=1
+encoding//mushpy/commands/cmdWalkPause.py=utf-8
+encoding//mushpy/commands/mudCmd.py=utf-8
+encoding//mushpy/commands/mudCmdCrossRiver.py=utf-8
+encoding//mushpy/commands/mudCmdDirection.py=utf-8
+encoding//mushpy/commands/mudCmdEnable.py=utf-8
+encoding//mushpy/commands/mudCmdHpbrief.py=utf-8
+encoding//mushpy/commands/mudCmdInventory.py=utf-8
+encoding//mushpy/commands/mudCmdNoEcho.py=utf-8
+encoding//mushpy/commands/mudCmdRoom.py=utf-8
+encoding//mushpy/commands/mudCmdScore.py=utf-8
+encoding//mushpy/commands/mudCmdSkills.py=utf-8
+encoding//mushpy/commands/mudCmdWait.py=utf-8
+encoding//mushpy/const.py=utf-8
+encoding//mushpy/mush.py=utf-8
+encoding//mushpy/objects.py=utf-8
+encoding//mushpy/triggers.py=utf-8
