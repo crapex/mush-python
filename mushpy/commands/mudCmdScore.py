@@ -15,16 +15,15 @@ class CmdScore(MudCommand):
         self.info = {}
     
     # def _onStartCapture(self, name, line, wildcards):
-    def _onStartCapture(self, tri):
-        name, line, wildcards = tri.info
+    def _onStartCapture(self, sender, args):
         self._triggers['sc_title'].Enabled = True
         self._triggers['sc_prop'].Enabled = True
         self._triggers['sc_money'].Enabled = True
         self._triggers['sc_end'].Enabled = True
     
     # def _onTitleCapture(self, name, line, wildcards):
-    def _onTitleCapture(self, tri):
-        name, line, wildcards = tri.info
+    def _onTitleCapture(self, sender, args):
+        wildcards = args.wildcards
         self.info['name'] = wildcards[1].strip()
         self.info['id'] = wildcards[2].strip().lower()
         title = wildcards[0]
@@ -43,16 +42,16 @@ class CmdScore(MudCommand):
             self.info['menpai'] = 'NA'
         
     # def _onPropCapture(self, name, line, wildcards):
-    def _onPropCapture(self, tri):
-        name, line, wildcards = tri.info
+    def _onPropCapture(self, sender, args):
+        wildcards = args.wildcards
         self.info['str'] = int(wildcards[0])
         self.info['int'] = int(wildcards[1])
         self.info['con'] = int(wildcards[2])
         self.info['dex'] = int(wildcards[3])
         
     # def _onMoneyCapture(self, name, line, wildcards):
-    def _onMoneyCapture(self, tri):
-        name, line, wildcards = tri.info
+    def _onMoneyCapture(self, sender, args):
+        wildcards = args.wildcards
         self.info['money'] = wildcards[0].strip()
         
     def _beforeExecute(self, **params):
