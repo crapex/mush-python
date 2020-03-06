@@ -19,7 +19,7 @@ class MushObject:
         else:
             res = None
             
-        assert(isinstance(res, MushHelper), "未正确配置MushHelper，请检查！".format(self.name))
+        assert isinstance(res, MushHelper), "未正确配置MushHelper，请检查！".format(self.name)
         return res
     
     @property

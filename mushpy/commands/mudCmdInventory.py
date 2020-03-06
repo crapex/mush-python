@@ -27,21 +27,21 @@ class CmdInventory(MudCommand):
     _sellList = ('changjian', 'duanjian', 'chang jian', 'armor', 'blade', 'xiao lingdang', 'fangtian ji', 'jun fu', 'junfu', 'changqiang', 'chang qiang')
     _sellDesc = ('长剑', '短剑', '铁甲', '钢刀', '小铃铛', '方天画戟', '军服', '长枪')
 
-    def __init__(self, group, **params):
-        super().__init__(group, **params)
+    def __init__(self, owner, group, **params):
+        super().__init__(owner, group, **params)
         self._initVariables()
     
     def _initVariables(self):
-        self.items = {}
-        self.food = []
-        self.water = []
-        self.trash = []
-        self.sells = []
+        self._result["items"] = {}
+        self._result["food"] = []
+        self._result["water"] = []
+        self._result["trash"] = []
+        self._result["sells"] = []
         
-        self.cash = 0
-        self.gold = 0
-        self.silver = 0
-        self.coin = 0
+        self._result["cash"] = 0
+        self._result["gold"] = 0
+        self._result["silver"] = 0
+        self._result["coin"] = 0
     
     def _onItemCapture(self, sender, args):
         wildcards = args.wildcards
@@ -54,40 +54,35 @@ class CmdInventory(MudCommand):
             item_cnt = 1
         
         item = ItemDescription(item_id, item_desc, item_cnt)
-        # print(item_id, item_desc, item_cnt)
-        # print(item)
         
-        self.items[item_id] = item
+        self._result["items"][item_id] = item
         
         if item_id == 'thousand-cash':
-            self.cash = item_cnt
+            self._result["cash"] = item_cnt
         elif item_id == 'gold':
-            self.gold = item_cnt
+            self._result["gold"] = item_cnt
         elif item_id == 'silver':
-            self.silver = item_cnt
+            self._result["silver"] = item_cnt
         elif item_id == 'coin':
-            self.coin = item_cnt
+            self._result["coin"] = item_cnt
         elif item_id in self._foodList:
-            self.food.append(item)
+            self._result["food"].append(item)
         elif item_id in self._waterList:
-            self.water.append(item)
+            self._result["water"].append(item)
         elif item_id in self._trashList:
-            # self.mush.Execute('drop {} {}'.format(item_cnt, item_id))
             self.mush.Execute('drop {}'.format(item_id))
         elif item_id in self._sellList:
             if item_desc in self._sellDesc:  # 防止ID相同的东西被判定，如Armor
-                self.sells.append(item)
+                self._result["sells"].append(item)
 
     def _onWeaponCapture(self, sender, args):
         wildcards = args.wildcards
-        self.weapon_name = wildcards[0]
-        self.weapon_id = wildcards[1]
+        self._result["weapon_name"] = wildcards[0]
+        self._result["weapon_id"] = wildcards[1]
 
     @property
     def totalMoney(self):
-        # return self.cash * 10 + self.gold + self.silver / 100.0 + self.coin / 10000.0
-        return (self.cash * 10 + self.gold) * 100 + self.silver + self.coin / 100.0
-        # return '{}两黄金{}两白银{}文铜板'.format(self.cash * 10 + self.gold, self.silver, self.coin)
+        return (self._value["cash"] * 10 + self._value["gold"]) * 100 + self._value["silver"] + self._value["coin"] / 100.0
     
     def _beforeExecute(self, **params):
         self._initVariables()

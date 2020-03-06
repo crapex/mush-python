@@ -5,7 +5,7 @@ from ..objects import MushObject, Trigger
 
 
 TriggerDefinition = namedtuple('TriggerDefinition', ['name', 'regx', 'func', 'lines'])
-CommandEventArgs = namedtuple("CommandEventArgs", ["state", "sender", "args"])
+CommandEventArgs = namedtuple("CommandEventArgs", ["state", "result"])
 
 def Event(name):
     @property
@@ -17,7 +17,7 @@ def Event(name):
     @prop.setter
     def prop(self, value):
         if value:
-            assert(callable(value), 'The event shall be callable!')
+            assert callable(value), 'The event shall be callable!'
             self._events[name] = value
         else:
             self._events[name] = None
@@ -62,9 +62,12 @@ class MudCommand(MushObject):
         super().__init__(owner)
         self._group = group                         # group name
         self._events = {}                           # event list
-        self.InitTriggers()                         # init all triggers
+        self._initTriggers()                        # init all triggers
         
         self._state = CommandState.NotStart         # state
+        self._enabled = False
+        
+        self._result = {}                           # save the command result for event call
         
     def _initTriggers(self):
         '''
@@ -82,12 +85,12 @@ class MudCommand(MushObject):
             func = self._events[name]
             if callable(func):
                 #print('do_event: %s' % self.state)
-                func(self, CommandEventArgs(self._state, args))
+                func(self, CommandEventArgs(self._state, self._result))
                 #self._events[name] = None                           # all event only fire once.
     
     def _coroutine(self):
         state, sender, args = yield
-        self._afterExecute(state, sender, args)
+        self._afterExecute(state)
         
     def _onSuccess(self, sender, args):
         try:
@@ -118,15 +121,24 @@ class MudCommand(MushObject):
         en = params.get('autoenable', True)
         self.Enable(en)
     
-    def _afterExecute(self, state, sender, args):
+    def _afterExecute(self, state):
         self.Enable(False) 
         self._state = state
-        self._doEvent("AfterDone", CommandEventArgs(state, sender, args))    
+        self._doEvent("AfterDone")  
         self._state = CommandState.NotStart
  
     def Enable(self, value = True):  
+        self._enabled = value
         for tri in self._triggers.keys():
             self._triggers[tri].Enabled = value
+    
+    @property
+    def Enabled(self):
+        return self._enabled
+    
+    @Enabled.setter
+    def Enabled(self, value):
+        self.Enable(value)
     
     def Execute(self, cmd, **params):
         self._command = cmd                                         # command text

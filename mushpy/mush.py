@@ -9,10 +9,7 @@ class MushHelper:
     '''
     MushHelper 类型的变量用于与mushclient之间的接口，其使用singleton设计模式以确保只有1个全局对象。
     在mushclient的world的脚本文件前面要对该类型进行配置和初始化，以确保其他模块的正常使用。配置与初始化代码如下：
-       helper = MushHelper()
-       helper.world = world
-       helper.pyengine = ax._scriptEngine_
-       helper.initialization()
+       helper = MushHelper(world, ax)
     '''
     
     # 处理逻辑： 在mushclient的全局命名空间（world.ax._scriptEngine_.globalNameSpaceModule）中注册3个函数，供python脚本创建的所有触发器、定时器、别名使用
@@ -26,9 +23,9 @@ class MushHelper:
         self._trigger_functions = dict()    # _trigger_functions词典用于存储所有注册至MushHelper中对应trigger的处理函数，name, func 键值对
         self._alias_functions = dict()      # _alias_functions词典用于存储所有注册至MushHelper中对应alias的处理函数，name, func 键值对
         self._timer_functions = dict()      # _timer_functions词典用于存储所有注册至MushHelper中对应timer的处理函数，name, func 键值对
-        self._items["world"] = world                  # save local world object
-        self._items["ax"] = ax                        # save local ax object
-        self._items["pyengine"] = ax._scriptEngine_   # save local scriptEngine object
+        self._world = world                 # save local world object
+        self._ax = ax                       # save local ax object
+        self._pyengine = ax._scriptEngine_  # save local scriptEngine object
         
         self.initialization()
         
@@ -53,7 +50,7 @@ class MushHelper:
         利用python特点，将访问所有的MushHelper不存在的对象重新定向到world的同名对象上
         这样，就可以直接 MushHelper.EnableTriggerGroup，相当于 world.EnableTriggerGroup
         '''
-        attr = getattr(self.world, name, 'None')
+        attr = getattr(self._world, name, 'None')
         if attr:
             return attr
         
@@ -61,11 +58,11 @@ class MushHelper:
     
     @property
     def world(self):
-        return self._items['world']
+        return self._world
 
     @property
     def pyengine(self):
-        return self._items['pyengine']
+        return self._pyengine
     
     def additem(self, name, item):
         self._items[name] = item
@@ -91,11 +88,11 @@ class MushHelper:
         if timestamp:
             msg = '{}: {}'.format(datetime.now().strftime('%x %X'), msg)
         
-        msg = msg.replace('\r\n', '\n')
+        msg = msg.replace(r'\r\n', r'\n')
         self.ColourTell(color, bgColor, msg)
         
         if newline:
-            self.ColourTell('\n')
+            self.Tell('\n')
             
     def Log(self, msg, timestamp = True, newline = True):
         self.LogCustom(msg, "white", "black", timestamp, newline)

@@ -11,7 +11,7 @@ class CmdEnable(MudCommand):
     def _onEffectiveSkillCapture(self, sender, args):
         wildcards = args.wildcards
         _efskill = EffectiveSkill(wildcards[1], wildcards[0], wildcards[2], wildcards[3])
-        self.enables[wildcards[1]] = _efskill
+        self._result["enables"][wildcards[1]] = _efskill
         
         self._triggers['en_skill_end'].Enabled = True
     
@@ -24,5 +24,5 @@ class CmdEnable(MudCommand):
             func(self)   
     
     def Execute(self, cmd = 'enable', **params):
-        self.enables = {}
+        self._result["enables"] = {}
         super().Execute(cmd, **params)

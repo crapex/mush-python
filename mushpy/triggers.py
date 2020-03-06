@@ -11,6 +11,15 @@ EffectiveSkill = namedtuple('EffectiveSkill', ['name', 'basic', 'special', 'leve
 
 # 以下为特殊的Trigger，定义好特定类（主要是处理回馈数据）
 
+class TriggerRoomTitle(Trigger):
+    def __init__(self, owner, group, script = None, **options):
+        super().__init__(owner, group, r"^[> ]*(\S*)\s*-\s*(?:\[(野外|城内|门派|0)\])?(?:\s*\[(存盘点|玩家储物柜)\])?$", script, **options)
+        self.Enabled = True
+        self._roomname = ''
+        
+    def __call__(self, name, line, wildcards):
+        self._roomname = wildcards[0]
+
 class TriggerEffectiveSkill(Trigger):
     def __init__(self, owner, group, script = None, **options):
         super().__init__(owner, group, r'\s*(\S+)\s*\((\S+)\)\s*：\s*(\S+)\s*有效等级：(\d+)', script, **options)

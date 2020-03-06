@@ -29,7 +29,7 @@ class CmdRoom(MudCommand):
     
     def _onNameTrigger(self, sender, args):
         wildcards = args.wildcards
-        self.room.Name = wildcards[0].strip()
+        self._result["room"].Name = wildcards[0].strip()
         self._triggers['room_retry'].Enabled = False
         self._triggers['room_name'].Enabled = False
         self._triggers['room_relation'].Enabled = True
@@ -39,7 +39,7 @@ class CmdRoom(MudCommand):
         
     def _onRelationTrigger(self, sender, args):
         wildcards = args.wildcards
-        self.room.Relation += wildcards[0].strip()
+        self._result["room"].Relation += wildcards[0].strip()
 
     def _onDescTrigger(self, sender, args):
         wildcards = args.wildcards
@@ -53,13 +53,13 @@ class CmdRoom(MudCommand):
         if omit_exits != None or omit_weather != None or omit_node != None or omit_changjiang != None or omit_page != None:
             desc=''
         
-        self.room.Description += desc     
+        self._result["room"].Description += desc     
         self._triggers['room_relation'].Enabled = False
           
     def _onWeatherTrigger(self, sender, args):
         wildcards = args.wildcards
-        self.room.Season = wildcards[0].strip()
-        self.room.Weather = wildcards[1].strip()
+        self._result["room"].Season = wildcards[0].strip()
+        self._result["room"].Weather = wildcards[1].strip()
         self._triggers['room_desc'].Enabled = False
     
     def _onRetry(self, sender, args):
@@ -74,12 +74,12 @@ class CmdRoom(MudCommand):
         exits = exits.replace('。','').replace(' ', '').replace('、', ';').replace('和', ';')  # 去除句号、空格；将顿号、和转换为;
         exit_list = exits.split(';')
         exit_list.sort()
-        self.room.Exit = ';'.join(exit_list)
+        self._result["room"].Exit = ';'.join(exit_list)
         
         super()._onSuccess(sender, args)        
     
     def _beforeExecute(self, **params):
-        self.room = Room()
+        self._result["room"] = Room()
         self.Enable(False)
         self._triggers['room_retry'].Enabled = True
         self._triggers['room_name'].Enabled = True

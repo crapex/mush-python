@@ -15,8 +15,8 @@ class CmdSkills(MudCommand):
     # def _onSkillCapture(self, name, line, wildcards):
     def _onSkillCapture(self, sender, args):
         wildcards = args.wildcards
-        self.skills.append(Skill(wildcards[0], wildcards[1], float(wildcards[2])))
+        self._result["skills"].append(Skill(wildcards[0], wildcards[1], float(wildcards[2])))
 
     def Execute(self, cmd='skills', **params):
-        self.skills = []
+        self._result["skills"] = []
         super().Execute(cmd, **params)

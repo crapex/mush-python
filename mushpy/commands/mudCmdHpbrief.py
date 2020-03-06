@@ -23,10 +23,10 @@ class CmdHpbrief(MudCommand):
     def _onSuccess(self, sender, args):
         wildcards = args.wildcards
         try:
-            self.hp = dict()
+            self._result["hp"] = {}
             for lineidx in range(0, 3):
                 for idx, val in enumerate(wildcards[lineidx].split(',')):
-                    self.hp[self.hpKey[lineidx][idx]] = self._tonumber(val)
+                    self._result["hp"][self.hpKey[lineidx][idx]] = self._tonumber(val)
                     
             self._generator.send(CommandState.Success)
         except StopIteration:
