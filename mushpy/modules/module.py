@@ -1,11 +1,10 @@
 # -*- coding:utf-8 -*-
 
+from ..objects import Alias
 from ..commands import TriggerDefinition, CommandState, MudCommand
 
 # module is a special command
 class Module(MudCommand):
-    _initTriList = ()
-    
     def __init__(self, owner, modulename, **options):
         super().__init__(owner, modulename)
 
@@ -50,3 +49,5 @@ class Module(MudCommand):
         
     def Stop(self, **options):
         pass
+    
+__all__ = ['TriggerDefinition', 'CommandState', 'MudCommand', 'Alias', 'Module']

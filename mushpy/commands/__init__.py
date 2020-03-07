@@ -1,4 +1,4 @@
-from .mudCmd import MudCommand, TriggerDefinition, CommandState
+from .mudCmd import MudCommand, TriggerDefinition, CommandState, CommandEventArgs
 from .mudCmdNoEcho import CmdNoEcho
 from .mudCmdWait import CmdWait
 from .mudCmdEnable import CmdEnable

@@ -95,13 +95,13 @@ class MushHelper:
             self.Tell('\n')
             
     def Log(self, msg, timestamp = True, newline = True):
-        self.LogCustom(msg, "white", "black", timestamp, newline)
+        self.LogCustom(msg, "blue", "white", timestamp, newline)
             
     def Error(self, msg, timestamp = True, newline = True):
         self.LogCustom(msg, "red", "wheat", timestamp, newline)
         
     def Warning(self, msg, timestamp = True, newline = True):
-        self.LogCustom(msg, "gold", "lawngreen", timestamp, newline)
+        self.LogCustom(msg, "darkred", "lawngreen", timestamp, newline)
         
     def Info(self, msg, timestamp = False, newline = False):
         self.LogCustom(msg, timestamp = timestamp, newline = newline)
@@ -268,4 +268,15 @@ class MushHelper:
                                         
         total = b * 100 + s * 10 + g
         return total
+
+
+def MushVariable(name):
+    @property
+    def prop(self):
+        return self.mush.GetVariable(name)
     
+    @prop.setter
+    def prop(self, value):
+        self.mush.SetVariable(name, value)
+            
+    return prop    

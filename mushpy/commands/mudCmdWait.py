@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 from ..objects import Timer
-from .mudCmd import MudCommand
+from .mudCmd import MudCommand, CommandEventArgs
 
 # 利用MUSHCLIENT定时器模拟命令
 class CmdWait(MudCommand):
@@ -15,7 +15,7 @@ class CmdWait(MudCommand):
     def _onTimeout(self, sender, args):
         #print('on timer, the generator is:', self._generator)
         self._timer.Enabled = False
-        super()._onTimeout(sender, args)
+        super()._onSuccess(sender, args)
         
     def Execute(self, cmd, **params):
         self._timeout = cmd

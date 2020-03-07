@@ -15,11 +15,12 @@ class ItemDescription:
 
 
 class CmdInventory(MudCommand):
-    _triList = (TriggerDefinition('iv_item', r'^(?:(\S+)(?:柄|把|盆|只|个|块|文|两))?(\S+)\((.*)\)$', '_onItemCapture', 1),
-                # TriggerDefinition('iv_item', r'^(\S+)\((.*)\)$', '_onItemCapture', 1),
-                TriggerDefinition('iv_right', r'你右手拿着：(.*)\((.*)\)', '_onWeaponCapture', 1),
-                TriggerDefinition('iv_done', r'你身上穿着：|你正光着个身子呀！你身上什么也没穿！', '_onSuccess', 1),
-                )
+    _initTriList = (
+            TriggerDefinition('iv_item', r'^(?:(\S+)(?:柄|把|盆|只|个|块|文|两))?(\S+)\((.*)\)$', '_onItemCapture', 1),
+            # TriggerDefinition('iv_item', r'^(\S+)\((.*)\)$', '_onItemCapture', 1),
+            TriggerDefinition('iv_right', r'你右手拿着：(.*)\((.*)\)', '_onWeaponCapture', 1),
+            TriggerDefinition('iv_done', r'你身上穿着：|你正光着个身子呀！你身上什么也没穿！', '_onSuccess', 1),
+            )
     
     _foodList = ('doufu', 'gan liang', 'mala doufu', 'liuli qiezi', 'shanhu baicai')
     _waterList = ('jiudai', 'qingshui hulu', 'hulu',)

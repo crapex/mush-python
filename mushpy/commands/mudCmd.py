@@ -47,7 +47,7 @@ class MudCommand(MushObject):
                         执行完但失败  ----> _onFail
                         执行超时      ----> _onTimeout (取消超时判定，设置单个超时命令，用于多命令执行时判定超时)
                执行后  ----> _afterExecute
-           2、可以为BeforeExecute和AfterExecute注册事件，即将函数引用加入_event
+           2、可以为BeforeExecute和AfterDone注册事件，即将函数引用加入_event
     '''  
     
     _initTriList = ()
@@ -76,9 +76,9 @@ class MudCommand(MushObject):
         self._triggers = {}
         for tri in self._initTriList:
             if tri.lines > 1:
-                self._triggers[tri.name] = Trigger(self.owner, self._group, tri.regx, getattr(self, tri.func), multiline = True, lines = tri.lines, name = tri.name)
+                self._triggers[tri.name] = Trigger(self, self._group, tri.regx, getattr(self, tri.func), multiline = True, lines = tri.lines, name = tri.name)
             else:
-                self._triggers[tri.name] = Trigger(self.owner, self._group, tri.regx, getattr(self, tri.func), name = tri.name)
+                self._triggers[tri.name] = Trigger(self, self._group, tri.regx, getattr(self, tri.func), name = tri.name)
             
     def _doEvent(self, name, args = None):
         if name in self._events.keys():
@@ -86,7 +86,7 @@ class MudCommand(MushObject):
             if callable(func):
                 #print('do_event: %s' % self.state)
                 func(self, CommandEventArgs(self._state, self._result))
-                #self._events[name] = None                           # all event only fire once.
+                #self._events[name] = None                                       # all event only fire once.
     
     def _coroutine(self):
         state, sender, args = yield

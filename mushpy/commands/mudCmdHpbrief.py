@@ -3,7 +3,7 @@
 from .mudCmd import MudCommand, CommandState, TriggerDefinition
 
 class CmdHpbrief(MudCommand):
-    _triList = (TriggerDefinition('hpbrief', r'^#(\S*)\n#(\S*)\n#(\S*)$', '_onSuccess', 3),)
+    _initTriList = (TriggerDefinition('hpbrief', r'^#(\S*)\n#(\S*)\n#(\S*)$', '_onSuccess', 3),)
     
     hpKey = (('exp', 'pot', 'neilimax', 'neili', 'jinglimax', 'jingli'), \
               ('qitotal', 'qimax', 'qi', 'jingtotal', 'jingmax', 'jing'), \

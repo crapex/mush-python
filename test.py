@@ -1,16 +1,32 @@
 import sys
 from importlib import reload
 
-##world.Note(repr(sys.path))
+_MODULE_PATH_ = r'D:\Programming\liclipse\mushclient'
 
-if not r'D:\Programming\liclipse\mushclient' in sys.path:
-    sys.path.append(r'D:\Programming\liclipse\mushclient')
+if not _MODULE_PATH_ in sys.path:
+    sys.path.append(_MODULE_PATH_)
+
+import mushpy.commands.mudCmdRoom
+reload(mushpy.commands.mudCmdRoom)
+
+import mushpy.modules.modRandomMove
+reload(mushpy.modules.modRandomMove)
 
 import mushpy.player
 reload(mushpy.player)
 
 from mushpy.player import Player
 
-myself = Player(world, ax, 'id', 'pass', 'name')
+myself = Player(world, ax)
 
-##world.Note('Hello mushpy! The Player has been created successfully!')
+myself.mush.Info('All modules have been loaded!')
+
+
+
+#
+#您上次是在Thu Mar  5 22:15:29 2020从101.88.117.218连线进入，请及时核对。
+#如果与您实际经历不符，请立刻修改密码。
+
+#目前权限：(player)
+
+#重新连线完毕。

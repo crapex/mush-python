@@ -11,14 +11,15 @@ EffectiveSkill = namedtuple('EffectiveSkill', ['name', 'basic', 'special', 'leve
 
 # 以下为特殊的Trigger，定义好特定类（主要是处理回馈数据）
 
-class TriggerRoomTitle(Trigger):
+class TriggerRoomName(Trigger):
     def __init__(self, owner, group, script = None, **options):
         super().__init__(owner, group, r"^[> ]*(\S*)\s*-\s*(?:\[(野外|城内|门派|0)\])?(?:\s*\[(存盘点|玩家储物柜)\])?$", script, **options)
         self.Enabled = True
-        self._roomname = ''
+        self.roomname = ''
         
     def __call__(self, name, line, wildcards):
-        self._roomname = wildcards[0]
+        self.roomname = wildcards[0]
+        super().__call__(name, line, wildcards)
 
 class TriggerEffectiveSkill(Trigger):
     def __init__(self, owner, group, script = None, **options):
@@ -97,3 +98,5 @@ class TriggerAntiRobot(Trigger):
         url = r'http://www.pkuxkx.net/{}'.format(param)
         
         webbrowser.open(url)
+        
+__all__ = ["TriggerRoomName", "TriggerEffectiveSkill", "TriggerHpbrief", "TriggerResponse", "TriggerAntiRobot"]

@@ -13,7 +13,7 @@ class CmdCrossRiver(MudCommand):
         5: arrived, out
     '''
     
-    _triList = (
+    _initTriList = (
                  TriggerDefinition('rv_boat', r'^[> ]*一叶扁舟缓缓地驶了过来，艄公将一块踏脚板搭上堤岸，以便乘客|^[> ]*岸边一只渡船上的老艄公说道：正等着你', '_onBoat', 1),
                  TriggerDefinition('rv_wait', r'^[> ]*只听得江面上隐隐传来：“别急嘛，这儿正忙着呐……”$', '_onWait', 1),
                  TriggerDefinition('rv_arrived', r'^[> ]*艄公说“到啦，上岸吧”，随即把一块踏脚板搭上堤岸。$', '_onArrived', 1),

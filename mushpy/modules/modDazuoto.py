@@ -1,15 +1,16 @@
 # -*- coding:utf-8 -*-
 
-from .module import Module, TriggerDefinition, CommandState
+from .module import *
 
 class ModuleDazuoTo(Module):
-    _triList = (TriggerDefinition('done', r'[> ]*(..\.\.)*你运功完毕，深深吸了口气，站了起来。$', '_onDone', 1),
-                 TriggerDefinition('noqi', r'^[> ]*你现在的气太少了，无法产生内息运行全身经脉。$', '_onNoQi', 1),
-                 TriggerDefinition('nojing', r'^[> ]*你现在精不够，无法控制内息的流动！$', '_onNoJing', 1),
-                 TriggerDefinition('wait', r'^[> ]*你正在运行内功加速全身气血恢复，无法静下心来搬运真气。$', '_onWait', 1),
-                 TriggerDefinition('halt', r'^[> ]*你把正在运行的真气强行压回丹田，站了起来。|^[> ]*你现在不忙。', '_onStop', 1),
-                 TriggerDefinition('finish', r'^[> ]*你现在内力接近圆满状态。', '_onDone', 1),
-                 )
+    _initTriList = (
+        TriggerDefinition('done', r'[> ]*(..\.\.)*你运功完毕，深深吸了口气，站了起来。$', '_onDone', 1),
+        TriggerDefinition('noqi', r'^[> ]*你现在的气太少了，无法产生内息运行全身经脉。$', '_onNoQi', 1),
+        TriggerDefinition('nojing', r'^[> ]*你现在精不够，无法控制内息的流动！$', '_onNoJing', 1),
+        TriggerDefinition('wait', r'^[> ]*你正在运行内功加速全身气血恢复，无法静下心来搬运真气。$', '_onWait', 1),
+        TriggerDefinition('halt', r'^[> ]*你把正在运行的真气强行压回丹田，站了起来。|^[> ]*你现在不忙。', '_onStop', 1),
+        TriggerDefinition('finish', r'^[> ]*你现在内力接近圆满状态。', '_onDone', 1),
+        )
     
     def __init__(self, owner, modulename='dazuoto', **options):
         super().__init__(owner, modulename, **options)
@@ -17,21 +18,32 @@ class ModuleDazuoTo(Module):
         self._forcelevel = 0
         self._dazuo_point = 10
         self._always = False
-        
-        # self.UpdateForceLevel()
-        
+
         # link the useful commands
-        self._Effective = self.owner.Commands['enable']
+        self._Effective = owner.Commands['enable']
+        self._Hpbrief = owner.Triggers['hpbrief']
         
+        # create the alias for user.
+        self._alias = Alias(self, self._group, r'^dzt(?:\s+(.*))?$', self._aliasFunction, name='dazuoto')
+        
+    def _aliasFunction(self, sender, args):
+        param = args.wildcards[0]
+        if param == 'stop':
+            self.Stop()
+        elif param == '0':
+            self.Start(always=True)
+        else:
+            self.Start(after=param)
+    
     def UpdateForceLevel(self):
         if self._forcelevel == 0:
-            self.player.Effective.AfterDone = self._update_forcelevel
-            self.player.Effective.Execute()
+            self._Effective.AfterDone = self._update_forcelevel
+            self._Effective.Execute()
 
     def _update_forcelevel(self, sender, args):
         if args.state == CommandState.Success:
             self._Effective.AfterDone = None
-            self._forcelevel = int(args["enables"]['force'].level)
+            self._forcelevel = int(args.result["enables"]['force'].level)
             self._dazuo_point = (self._forcelevel - 5) // 10
             if self._always:
                 self._dazuo_cmd = 'dazuo ' + str(self._dazuo_point)
@@ -59,28 +71,29 @@ class ModuleDazuoTo(Module):
         self.mush.DoAfter(3, self._dazuo_cmd)
         
     def _check_neili(self, sender, args):
-        hp = args.result["hp"]
+        hp = args
+        
         _current = hp['neili']
         _max = 2 * hp['neilimax'] - 100
         
         if _current < _max:
-            self.mush.info('当前内力：{}，需打坐到：{}，还差{}，打坐命令{}'.format(_current, _max, _max - _current, self._dazuo_cmd))
+            self.mush.Log('当前内力：{}，需打坐到：{}，还差{}，打坐命令{}'.format(_current, _max, _max - _current, self._dazuo_cmd))
             self._onNoQi(sender, args)
         else:
             self.Enabled = False
                 
-            self.player.Hpbrief.RemoveCallback(self._check_neili)
+            self._Hpbrief.RemoveCallback(self._check_neili)
             self.mush.Execute('exert recover')
 
             # execute callback when done.
-            self.mush.info('function module [dazuoto] done.')
+            self.mush.Log('module [dazuoto] done.')
             if self._after:
                 self.Execute('response dazuoto ' + self._after)
             
             self._doEvent('AfterDone')                
     
     def _onStop(self, sender, args):
-        self.mush.info('function module [dazuoto] has been halted manually.')
+        self.mush.Log('module [dazuoto] has been halted manually.')
         self._doEvent('AfterStop')
     
     def Start(self, **options):
@@ -92,16 +105,17 @@ class ModuleDazuoTo(Module):
         
         if self._always:
             self._dazuo_cmd = 'dazuo ' + str(self._dazuo_point)
-            self.mush.info('function module [dazuoto]: start dazuo continuous')
+            self.mush.Log('module [dazuoto]: start dazuo continuous')
             self.mush.Execute(self._dazuo_cmd) 
         else:
             self._dazuo_cmd = 'dazuo max'
-            self.player.Hpbrief.AddCallback(self._check_neili)
-            self.mush.info('function module [dazuoto]: start dazuo to max...')
+            self._Hpbrief.AddCallback(self._check_neili)
+            self.mush.Log('module [dazuoto]: start dazuo to max...')
             # self.mush.Execute('hpbrief')
             self.mush.Execute('dazuo max')
             
     def Stop(self, **options):
         self.Enabled = False
-        self.player.Hpbrief.RemoveCallback(self._check_neili)            
+        self._Hpbrief.RemoveCallback(self._check_neili)            
         self.mush.DoAfter(1, 'halt')
+        self.mush.Warning('module [dazuoto]: halt manually!')

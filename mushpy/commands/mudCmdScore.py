@@ -4,11 +4,13 @@ from .mudCmd import MudCommand, TriggerDefinition
 
 # sc/score
 class CmdScore(MudCommand):
-    _triList = (TriggerDefinition('sc_start', r'^≡━━━━◎人物详情◎━━━━━━━━━━━━━━━━━━━━━━━━━━≡', '_onStartCapture', 1),
-                TriggerDefinition('sc_title', r'^[> ]*【.*】(\S+)\s(\S+)\((.*)\)', '_onTitleCapture', 1),
-                TriggerDefinition('sc_prop', r'^\s*膂力：\[\s*(\d+)\]  悟性：\[\s*(\d+)\]  根骨：\[\s*(\d+)\]  身法：\[\s*(\d+)\]', '_onPropCapture', 1),
-                TriggerDefinition('sc_money', r'^\s*存\s*款：\s*(\S+)$', '_onMoneyCapture', 1),
-                TriggerDefinition('sc_end', r'^≡━━━━━━━━━━━━━━━━━━━━━━━━◎北大侠客行◎━━━━≡', '_onSuccess', 1))
+    _initTriList = (
+        TriggerDefinition('sc_start', r'^≡━━━━◎人物详情◎━━━━━━━━━━━━━━━━━━━━━━━━━━≡', '_onStartCapture', 1),
+        TriggerDefinition('sc_title', r'^[> ]*【.*】(\S+)\s(\S+)\((.*)\)', '_onTitleCapture', 1),
+        TriggerDefinition('sc_prop', r'^\s*膂力：\[\s*(\d+)\]  悟性：\[\s*(\d+)\]  根骨：\[\s*(\d+)\]  身法：\[\s*(\d+)\]', '_onPropCapture', 1),
+        TriggerDefinition('sc_money', r'^\s*存\s*款：\s*(\S+)$', '_onMoneyCapture', 1),
+        TriggerDefinition('sc_end', r'^≡━━━━━━━━━━━━━━━━━━━━━━━━◎北大侠客行◎━━━━≡', '_onSuccess', 1),
+        )
     
     def __init__(self, owner, group):
         super().__init__(owner, group)
@@ -56,9 +58,6 @@ class CmdScore(MudCommand):
         '''
         self.Enable(False)
         self._triggers['sc_start'].Enabled = True
-        func = self._events['BeforeExecute']
-        if callable(func):
-            func(self)   
     
     def Execute(self, cmd='score', **params):
         super().Execute(cmd, **params)

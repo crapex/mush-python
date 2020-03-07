@@ -6,25 +6,49 @@ from pathlib import Path
 import pickle
 import sqlite3
 
+DBRoom = namedtuple('DBRoom', ['id', 'name', 'relation', 'description', 'exits', 'city', 'zone', 'alias', 'alias2', 'type'])
+DBRoomLink = namedtuple('DBRoomLink', ['linkfrom', 'linkto', 'path', 'time', 'money', 'city', 'name', 'roomtype']) 
+
+
 class Map:
     RoomTypeList = {'bank' : '钱庄', 'pawnshop' : '当铺', 'home' : '储物箱', 'pawn1' : '荣宝斋'}
-    DBRoom = namedtuple('DBRoom', ['id', 'name', 'relation', 'description', 'exits', 'city', 'zone', 'alias', 'alias2', 'type'])
-    DBRoomLink = namedtuple('DBRoomLink', ['linkfrom', 'linkto', 'path', 'time', 'money', 'city', 'name', 'roomtype']) 
     ResultType = namedtuple('ResultType', ['result', 'path', 'rooms', 'time', 'money', 'interval', 'room'])
-
+    
     _linksCache = dict()
+    cachefile = r'.\links.cache'
     
     def __init__(self, database):
         self._db = sqlite3.connect(database)
+           
+        cachepath = Path(self.cachefile)
         
-        #for _id in range(1, self.RoomsCount + 1):
-        #    links = self.FindRoomLinks(_id)
-        #    self._linksCache[_id] = links
+        '''
+        for _id in range(1, self.RoomsCount + 1):
+            links = self.FindRoomLinks(_id)
+            self._linksCache[_id] = links
+            
+        with open(cachefile, 'wb') as f:
+            f.write(pickle.dumps(self._linksCache))
+        '''
+
+        if cachepath.is_file():    
+            with open(self.cachefile, 'rb') as f:
+                self._linksCache = pickle.loads(f.read())
+        else:
+            self.RebuildLinksCache()
 
         print('gps database cached done.')
     
     def __del__(self):
         self._db.close()
+    
+    def RebuildLinksCache(self):
+        for _id in range(1, self.RoomsCount + 1):
+            links = self.FindRoomLinks(_id)
+            self._linksCache[_id] = links
+        
+        with open(self.cachefile, 'wb') as f:
+            f.write(pickle.dumps(self._linksCache))
     
     def AddNewRoom(self, mudroom, city=None):
         cur = self._db.cursor()
@@ -65,7 +89,7 @@ class Map:
             
         rooms = list()
         for room in cur.fetchall():
-            rooms.append(self.DBRoom(*room))
+            rooms.append(DBRoom(*room))
 
         cur.close()
         
@@ -143,7 +167,7 @@ class Map:
         
         links = list()
         for link in cur.fetchall():
-            links.append(self.DBRoomLink(*link))
+            links.append(DBRoomLink(*link))
 
         cur.close()
         
@@ -202,7 +226,7 @@ class Map:
         row = cur.fetchone()
         cur.close()
         
-        return self.DBRoom(*row)
+        return DBRoom(*row)
     
     def FindPathOrigin(self, fromID, toIdOrType=None, toType=None, costType='time'):
         MAX_COST = 99999
