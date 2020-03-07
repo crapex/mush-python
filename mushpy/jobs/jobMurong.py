@@ -17,8 +17,8 @@ class JobMurong(Job):
         super().__init__(owner, name, **options)
         
         self.job = "慕容信件"
-        
-        self._npcname = '%s发现的 慕容世家家贼(内鬼|家贼)' % self._playername
+
+        self._npcname = '%s发现的\s*慕容世家(内鬼|家贼)' % self._playername
         self._npcid = "%s's murong jiazei" % self._playerid
 
     def _jobstart(self, sender, args):
@@ -28,6 +28,7 @@ class JobMurong(Job):
     def _getjob(self, sender, args):
         wildcards = args.wildcards
         self.location = wildcards[0]
+        self.mush.InfoClear()
         self.mush.info('开始寻找位于 {} 的慕容家贼'.format(self.location))
         self._searchnpc()
         
@@ -47,6 +48,7 @@ class JobMurong(Job):
         self._triggers['npcdead'].Enabled = True
         
     def _npc_notfound(self, sender, args):
+        self.mush.InfoClear()
         self.mush.info('未找到位于 {} 的慕容家贼'.format(self.location))
         self.owner.RunModule('runto', afterDone=self._jobfail, to="mrf")
     
@@ -58,6 +60,7 @@ class JobMurong(Job):
         self.mush.Execute('get all from corpse')
         self._cmdWait.AfterDone = self._waitforidle
         self._cmdWait.Wait(2)
+        self.mush.InfoClear()
         self.mush.info('位于 {} 的慕容家贼已被干掉'.format(self.location))
   
     def _waitforidle(self, sender, args):
@@ -65,7 +68,7 @@ class JobMurong(Job):
             self._cmdWait.AfterDone = None
             self.mush.Execute('get all from corpse')
             self._triggers['npcdead'].Enabled = False
-            self.owner.RunModule('sellall', afterDone=self._aftersellall)
+            self.owner.RunModule('sellthings', afterDone=self._aftersellall)
     
     def _aftersellall(self, mod, args):
         self.owner.RunModule('savemoney', afterDone=self._aftersavemoney)
@@ -82,6 +85,7 @@ class JobMurong(Job):
     def _jobdone(self, sender, args):
         self.success += 1
         self.total += 1
+        self.mush.InfoClear()
         self.mush.info('【慕容信件】 共进行{}次，其中成功{}次，失败{}次。'.format(self.total, self.success, self.failure))
         self._cmdWait.AfterDone = self._waitjobdone
         self._cmdWait.Wait(2)
@@ -94,6 +98,7 @@ class JobMurong(Job):
     def _jobfail(self, mod, args):
         self.failure += 1
         self.total += 1
+        self.mush.InfoClear()
         self.mush.info('【慕容信件】 共进行{}次，其中成功{}次，失败{}次。'.format(self.total, self.success, self.failure))
         self.mush.Execute('ask pu about fail')
         self.owner.RunModule('liaoshang', afterDone=self._afterheal)

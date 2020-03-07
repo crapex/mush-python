@@ -61,7 +61,7 @@ class ModuleUpdateMap(Module):
                     else:
                         raise Exception("Don't recognize the command: {}".format(step))
                 else: 
-                    if step in self.gps._directions:
+                    if step in self.owner._directions:
                         self._commands['walk'].Execute(step)
                         # print('yes, walk execute: ' + step)
                     else:

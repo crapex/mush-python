@@ -105,7 +105,9 @@ class ModuleRunto(Module):
         elif to == 'here':
             self.mush.Execute('where')  # call the alias 'where' in ModuleWhere
         else:
-            self.Stop()                 # use stop to reset the module
+            self.AfterDone = None
+            self.AfterFail = None
+
             self.Start(to = to)     
     
     def _aliasMazeFunction(self, sender, args):
@@ -162,16 +164,16 @@ class ModuleRunto(Module):
                     cmd.AfterDone = None
 
                 if self.destination_name == self._triRoomName.roomname:
-                    self.mush.Log('module [runto]：到达目的地：{}'.format(self.destination_name))
+                    self.mush.Log('module [runto]：到达目的地：{}(ID: {})'.format(self.destination_name, self.destination_id))
                     self.mush.Execute('response gps ok')
                     self._doEvent('AfterDone')
                 elif self._retry_times < 1:
                     # 新增加的重试，未测试是否存在问题
                     self._retry_times += 1
-                    self.mush.Log('module [runto]：未到达目的地：{}，当前地点{}。准备再试一次'.format(self.destination_name, self.gps._roomname))
+                    self.mush.Log('module [runto]：未到达目的地：{}，当前地点{}。准备再试一次'.format(self.destination_name, self._triRoomName.roomname))
                     self.owner.RunModule('randmove', afterDone=self._check_start_location)
                 else:
-                    self.mush.Error("module [runto]：didn't arrive the destination {}, actual {}, please fix it manually".format(self.destination_name, self.gps._roomname))
+                    self.mush.Error("module [runto]：didn't arrive the destination {}, actual {}, please fix it manually".format(self.destination_name, self._triRoomName.roomname))
                     self.mush.Execute('response gps fail')
                     self._doEvent('AfterFail')
     
@@ -206,7 +208,7 @@ class ModuleRunto(Module):
             self.owner.RunModule('randmove', afterDone=self._check_start_location, start=rand_dir)
                 
     def _run_from_start_to_destination(self, source, destination):
-        strfmt = '找到从[{0}]到目的地[{1}]的路径：{2}，预计花费：{3}，搜索耗时{4:.2f}：'
+        strfmt = '找到从[{0}]到目的地[{1}]的路径：{2}，预计花费：{3}，搜索耗时{4:.2f}秒：'
         strfmt2 = '未找到从当前房间[{0}]到目的地[{1}]的路径，可能是数据库不完整'
 
         str_from = '{} {}(ID:{})'.format(source.city, source.name, source.id)

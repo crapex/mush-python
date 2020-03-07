@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 
 from ..objects import Alias
-from ..commands import TriggerDefinition, CommandState, MudCommand
+from ..commands import TriggerDefinition, CommandState, MudCommand, CommandEventArgs
 
 # module is a special command
 class Module(MudCommand):
@@ -12,6 +12,19 @@ class Module(MudCommand):
         
         self.options = options
 
+    # the module is a special command, 
+    # the event of module shall be only fired once
+    def _doEvent(self, name, args = None):
+        super()._doEvent(name, args)
+        self._events[name] = None
+        '''
+        if name in self._events.keys():
+            func = self._events[name]
+            if callable(func):
+                #print('do_event: %s' % self.state)
+                func(self, CommandEventArgs(self._state, self._result))
+                self._events[name] = None                                       # all event of module only fire once.
+        '''
     # the module is a special command, but it shall:
     # override the coroutine functions in MudCommand
     # to ensure it has proper reaction when start/stop.

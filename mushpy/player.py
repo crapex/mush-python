@@ -52,6 +52,7 @@ class Player(MushObject):
         "liaoshang" : ModuleHeal,
         "savemoney" : ModuleSaveMoney,
         "sellthings" : ModuleSellThings,
+        "food"      : ModuleFood
         }
     
     _commandAliases = {

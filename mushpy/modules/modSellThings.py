@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 
+from ..commands import CommandEventArgs
 from .module import *
 
 class ModuleSellThings(Module):
@@ -42,7 +43,7 @@ class ModuleSellThings(Module):
     def _checkSells(self):
         if len(self.sells) > 0:
             self.CmdWait.AfterDone = self._timerWait
-            self._timerWait(self.CmdWait, CommandState.Success)
+            self._timerWait(self.CmdWait, CommandEventArgs(CommandState.Success, None))
         else:
             self.mush.Log('module [SellThings]：身上已经没东西可卖了\n')
             self.Enabled = False
@@ -54,7 +55,7 @@ class ModuleSellThings(Module):
             self.sells = args.result["sells"]
             self._checkSells()
     
-    def _arrived_pawnshop(self, mod):
+    def _arrived_pawnshop(self, mod, args):
         self._checkSells()
     
     def _afterCheckThings(self, sender, args):

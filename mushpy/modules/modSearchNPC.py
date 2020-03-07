@@ -30,16 +30,18 @@ class ModuleSearchNPC(Module):
             to = m[1]
             npcname = m[2]
             npcid = m[3]
-            self.Stop()                             # use stop to reset module
+            
+            self.AfterDone = None
+            self.AfterFail = None
             self.Start(to=to, npcname=npcname, npcid=npcid) 
     
     def _resetall(self):
         for cmd in self._commands.values():
             cmd.Enable(False)
             cmd.AfterDone = None
-
+         
         if self.npc_tri:
-            del self.npc_tri
+            self.npc_tri.Enabled = False
     
     def _npc_found(self, sender, args):
         print('the npc has been found.')
@@ -104,7 +106,8 @@ class ModuleSearchNPC(Module):
         self._stepIndex = 0
         
         npc_pattern = r'\s*(.*){}\({}{}\)'.format(npcname, npcid[0].upper(), npcid[1:])
-        self.npc_tri = Trigger(self, self.modulename, npc_pattern, self._npc_found, flag=TriggerFlag.OneShot | TriggerFlag.Enabled, name = "npc_find")
+        self.npc_tri = Trigger(self, self.modulename, npc_pattern, self._npc_found, name = "npc_find")
+        self.npc_tri.Enabled = True
         
         for cmd in self._commands.values():
             cmd.Enable(True)

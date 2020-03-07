@@ -11,6 +11,7 @@ class Fight(MushObject):
         TriggerDefinition('kill', r'^[> ]*你对着.*吼道：「畜生！你死期已到，今天就让.*我送你上西天吧！」|^[> ]*你长笑一声，开始对周围众人痛下杀手！', '_onFightStart', 1),
         TriggerDefinition('qishi', r'^[> ]*你在攻击中不断积蓄攻势。\(气势：(\d+)%\)', '_onCheckQishi', 1),
         TriggerDefinition('end', r'^[> ]*经过一段时间后，你终于完全从紧张地战斗氛围中解脱出来。', '_onFightEnd', 1),
+        TriggerDefinition('weapon_fail', r'你手上持有的武器并不能用来发动「打狗棒·转」。', '_onWeaponFail', 1),
         )
     
     def __init__(self, owner, **options):
@@ -68,6 +69,9 @@ class Fight(MushObject):
             self.pfm.perform(wildcards[0], wildcards[1])
         else:
             self.pfm.perform(wildcards[0], None)
+     
+    def _onWeaponFail(self, sender, args):
+        pass
      
     def _onFightStart(self, sender, args):
         mode = args.line[:4]

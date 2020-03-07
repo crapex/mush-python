@@ -6,10 +6,10 @@ from .module import *
 class ModuleFood(Module):
     _initTriList = (
         TriggerDefinition('eat_none', r'你将剩下的.*吃得干干净净', '_onEatNone', 1),
-        TriggerDefinition('eat_next', r'你拿出.*咬了几口', '_onEatNext', 1),
+        TriggerDefinition('eat_next', r'你拿起.*咬了几口。', '_onEatNext', 1),
         TriggerDefinition('eat_done', r'你已经吃太饱了，再也塞不下任何东西了', '_onEatDone', 1),
         TriggerDefinition('drink_none', r'你已经将.*里的.*喝得一滴也不剩了', '_onDrinkNone', 1),
-        TriggerDefinition('drink_next', r'你拿出.*咕噜噜地喝了几口.*', '_onDrinkNext', 1),
+        TriggerDefinition('drink_next', r'你拿起.*咕噜噜地喝了几口清水。.*', '_onDrinkNext', 1),
         TriggerDefinition('drink_done', r'你已经喝太多了，再也灌不下一滴水了', '_onDrinkDone', 1),
         )
     
