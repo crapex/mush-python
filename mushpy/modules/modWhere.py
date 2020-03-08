@@ -23,13 +23,16 @@ class ModuleWhere(Module):
             self.mudroom = args.result["room"]
             self.dbrooms = self._map.FindRoomsByRoom(self.mudroom)
             
+            self._result["mudroom"] = self.mudroom
+            self._result["dbrooms"] = self.dbrooms
+            
             self.CommandRoom.AfterDone = None
             if len(self.dbrooms) >= 1:
                 for rm in self.dbrooms:
                     self.mush.Log('Find a matched room: {1} {2} (ID: {0})'.format(rm.id, rm.city, rm.name))
                     links = self._map.FindRoomLinks(rm.id)
                     for link in links:
-                        self.mush.Log('    room link "{0}" to {2} {3}(id: {1})'.format(link.path, link.linkto, link.city, link.name))
+                        self.mush.Log('    link (ID: {4}) path: "{0}"  to {2} {3}(id: {1})'.format(link.path, link.linkto, link.city, link.name, link.linkid))
                 
                 self._doEvent('AfterDone')     
             else:

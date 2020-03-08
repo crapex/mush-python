@@ -5,7 +5,7 @@ from .mudCmd import MudCommand, TriggerDefinition
 # sc/score
 class CmdScore(MudCommand):
     _initTriList = (
-        TriggerDefinition('sc_start', r'^≡━━━━◎人物详情◎━━━━━━━━━━━━━━━━━━━━━━━━━━≡', '_onStartCapture', 1),
+        TriggerDefinition('sc_start', r'^[> ]*≡━━━━◎人物详情◎━━━━━━━━━━━━━━━━━━━━━━━━━━≡', '_onStartCapture', 1),
         TriggerDefinition('sc_title', r'^[> ]*【.*】(\S+)\s(\S+)\((.*)\)', '_onTitleCapture', 1),
         TriggerDefinition('sc_prop', r'^\s*膂力：\[\s*(\d+)\]  悟性：\[\s*(\d+)\]  根骨：\[\s*(\d+)\]  身法：\[\s*(\d+)\]', '_onPropCapture', 1),
         TriggerDefinition('sc_money', r'^\s*存\s*款：\s*(\S+)$', '_onMoneyCapture', 1),

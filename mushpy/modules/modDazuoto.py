@@ -29,6 +29,7 @@ class ModuleDazuoTo(Module):
     def _aliasFunction(self, sender, args):
         param = args.wildcards[0]
         if param == 'stop':
+            self.mush.Warning('module [dazuoto]: halt manually!')
             self.Stop()
         elif param == '0':
             self.Start(always=True)
@@ -46,43 +47,43 @@ class ModuleDazuoTo(Module):
             self._forcelevel = int(args.result["enables"]['force'].level)
             self._dazuo_point = (self._forcelevel - 5) // 10
             if self._always:
-                self._dazuo_cmd = 'dazuo ' + str(self._dazuo_point)
+                self._tuna_cmd = 'dazuo ' + str(self._dazuo_point)
             else:
-                self._dazuo_cmd = 'dazuo max'
+                self._tuna_cmd = 'dazuo max'
                
     def _onDone(self, sender, args):
         if self._always:
-            self.mush.Execute(self._dazuo_cmd)
+            self.mush.Execute(self._tuna_cmd)
         else:
             self.mush.Execute('hpbrief')
         
     def _onNoQi(self, sender, args):
         if self._forcelevel >= 150:
             self.mush.Execute('exert recover')
-            self.mush.Execute(self._dazuo_cmd)
+            self.mush.Execute(self._tuna_cmd)
         else:
-            self.mush.DoAfter(5, self._dazuo_cmd)
+            self.mush.DoAfter(5, self._tuna_cmd)
         
     def _onNoJing(self, sender, args):
         self.mush.DoAfter(2, 'exert regenerate')
-        self.mush.DoAfter(3, self._dazuo_cmd)
+        self.mush.DoAfter(3, self._tuna_cmd)
         
     def _onWait(self, sender, args):
-        self.mush.DoAfter(3, self._dazuo_cmd)
+        self.mush.DoAfter(3, self._tuna_cmd)
         
-    def _check_neili(self, sender, args):
+    def _check_jingli(self, sender, args):
         hp = args
         
         _current = hp['neili']
         _max = 2 * hp['neilimax'] - 100
         
         if _current < _max:
-            self.mush.Log('当前内力：{}，需打坐到：{}，还差{}，打坐命令{}'.format(_current, _max, _max - _current, self._dazuo_cmd))
+            self.mush.Log('当前内力：{}，需打坐到：{}，还差{}，打坐命令{}'.format(_current, _max, _max - _current, self._tuna_cmd))
             self._onNoQi(sender, args)
         else:
             self.Enabled = False
                 
-            self._Hpbrief.RemoveCallback(self._check_neili)
+            self._Hpbrief.RemoveCallback(self._check_jingli)
             self.mush.Execute('exert recover')
 
             # execute callback when done.
@@ -104,18 +105,18 @@ class ModuleDazuoTo(Module):
         self.UpdateForceLevel()
         
         if self._always:
-            self._dazuo_cmd = 'dazuo ' + str(self._dazuo_point)
+            self._tuna_cmd = 'dazuo ' + str(self._dazuo_point)
             self.mush.Log('module [dazuoto]: start dazuo continuous')
-            self.mush.Execute(self._dazuo_cmd) 
+            self.mush.Execute(self._tuna_cmd) 
         else:
-            self._dazuo_cmd = 'dazuo max'
-            self._Hpbrief.AddCallback(self._check_neili)
+            self._tuna_cmd = 'dazuo max'
+            self._Hpbrief.AddCallback(self._check_jingli)
             self.mush.Log('module [dazuoto]: start dazuo to max...')
             # self.mush.Execute('hpbrief')
             self.mush.Execute('dazuo max')
             
     def Stop(self, **options):
         self.Enabled = False
-        self._Hpbrief.RemoveCallback(self._check_neili)            
+        self._Hpbrief.RemoveCallback(self._check_jingli)            
         self.mush.DoAfter(1, 'halt')
-        self.mush.Warning('module [dazuoto]: halt manually!')
+        

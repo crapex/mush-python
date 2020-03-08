@@ -3,15 +3,15 @@
 from .job import Job, TriggerDefinition
 
 class JobWananta(Job):
+    JOB_NAME = '万安塔'
+    
     _initTriList = (
         TriggerDefinition("leveldone", r"^[> ]*暗处的番邦武士对你一抱拳，道“阁下果然武功不凡", "_onleveldone", 1),
         TriggerDefinition("levelup", r"^[> ]*万安塔(.*)层\s*-\s*", "_onlevelup", 1),
         TriggerDefinition("killwin", r"^[> ]*你战胜了番邦武士!|^[> ]*经过一段时间后，你终于完全从紧张地战斗氛围中解脱出来", "_onkillwin", 1)
         )
     def __init__(self, owner, name='wat', **options):
-        super().__init__(owner, name, **options)
-        
-        self.job = "万安塔"
+        super().__init__(owner, name, **options) 
 
     def _go_up(self, mod, args):
         self.mush.Execute('exert recover')

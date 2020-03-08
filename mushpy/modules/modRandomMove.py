@@ -24,6 +24,11 @@ class ModuleRandMove(Module):
             if len(self.dbrooms) == 1:
                 # randmove ok
                 # self.mush.SendNoEcho('set brief 1')
+                self.destination_id = self.dbrooms[0].id
+                self.destination_name = self.dbrooms[0].name
+                self.destination_city = self.dbrooms[0].city
+                self._result["dbroom"] = self.dbrooms[0]
+                
                 self.mush.Log('已移动至确认地点：{} {}(ID: {})'.format(self.dbrooms[0].city, self.dbrooms[0].name, self.dbrooms[0].id))
                 self.CommandRoom.AfterDone = None
                 self._result["mudroom"] = args.result["room"]

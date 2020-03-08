@@ -23,6 +23,7 @@ class ModuleSearchNPC(Module):
         param = args.wildcards[0]
 
         if param == 'stop':
+            self.mush.Warning('module [searchnpc]: abort manually!')
             self.Stop()
         else:
             m = re.match(r'(\S+)\s+(\S+)\s+(.+)$', param)
@@ -39,9 +40,6 @@ class ModuleSearchNPC(Module):
         for cmd in self._commands.values():
             cmd.Enable(False)
             cmd.AfterDone = None
-         
-        if self.npc_tri:
-            self.npc_tri.Enabled = False
     
     def _npc_found(self, sender, args):
         print('the npc has been found.')
@@ -99,15 +97,22 @@ class ModuleSearchNPC(Module):
                 self._resetall()
                 
                 self._doEvent('AfterFail')
+        # add CmdwalkDirection timeout/fail judgement
+        elif (args.state == CommandState.Timeout) or (args.state == CommandState.Failed):
+            self.mush.Error("module [searchnpc]: Traverse failed because of walk timeout, don't find npc")
+            self.mush.Execute('response traverse fail')    
+            self._resetall()
+                
+            self._doEvent('AfterFail')
     
     def _traverse(self, path, npcname, npcid, **params):
         self._stepList = path.split(';')
         self._stepCount = len(self._stepList)
         self._stepIndex = 0
         
-        npc_pattern = r'\s*(.*){}\({}{}\)'.format(npcname, npcid[0].upper(), npcid[1:])
-        self.npc_tri = Trigger(self, self.modulename, npc_pattern, self._npc_found, name = "npc_find")
-        self.npc_tri.Enabled = True
+        #npc_pattern = r'\s*(.*){}\({}{}\)'.format(npcname, npcid[0].upper(), npcid[1:])
+        #self.npc_tri = Trigger(self, self.modulename, npc_pattern, self._npc_found, name = "npc_find")
+        #self.npc_tri.Enabled = True
         
         for cmd in self._commands.values():
             cmd.Enable(True)
@@ -117,6 +122,20 @@ class ModuleSearchNPC(Module):
         
         self.mush.SendNoEcho('set brief 3')
         self._on_wait_over(self._commands['walk'], CommandEventArgs(CommandState.Success, None))
+    
+    def _start_from_current_location(self, mod, args):
+        dbroomstart = args.result["dbroom"]
+        self._wholecity = False
+        self._deep = 4
+        
+        self._traverse_start_id = dbroomstart.id
+        self._traverse_path = self._map.FindTraversal(self._traverse_start_id, wholecity=self._wholecity, deep=self._deep)
+        
+        if self._traverse_path.result:
+            path = ';'.join(self._traverse_path.path)
+            self.mush.Log('module [searchnpc]: start to traverse for npc: {}({}) with path: {}'.format(self._npcname, self._npcid, path))
+            self._traverse(path, self._npcname, self._npcid)
+        pass
     
     def _arrive_at_start(self, mod, args):
         
@@ -140,16 +159,27 @@ class ModuleSearchNPC(Module):
         self._doEvent('AfterFail')
     
     def Start(self, **options):
-        to = options.get('to')
+        ''' to == None means traverse from current location. '''
+        to = options.get('to', None)
         self._npcname = options.get('npcname')
         self._npcid = options.get('npcid')
 
-        self.owner.RunModule('runto', afterDone=self._arrive_at_start, afterFail=self._not_find_path, to=to)   
+        if getattr(self, "npc_tri", None):
+            self.npc_tri.__del__()
+            self.npc_tri = None
+            
+        npc_pattern = r'\s*(.*){}\({}{}\)'.format(self._npcname, self._npcid[0].upper(), self._npcid[1:])
+        self.npc_tri = Trigger(self, self.modulename, npc_pattern, self._npc_found, flag = TriggerFlag.Enabled | TriggerFlag.OneShot)
+
+        if to:
+            self.owner.RunModule('runto', afterDone=self._arrive_at_start, afterFail=self._not_find_path, to=to)
+        else:
+            self.owner.RunModule('randmove', afterDone=self._start_from_current_location, afterFail=self._not_find_path)   
         
     def Stop(self, **options):
         for cmd in self._commands.values():
             cmd.AfterDone = None
         self.AfterDone = None
         self.AfterFail = None
-        self.mush.Warning('module [searchnpc]: abort manually!')
+        
         self._doEvent('AfterStop')   

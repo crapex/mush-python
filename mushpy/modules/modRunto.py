@@ -101,6 +101,7 @@ class ModuleRunto(Module):
             self.mush.Info(self._help)
             self.mush.Info('\n')
         elif to == 'stop':
+            self.mush.Warning('module [runto]：abort manually!')
             self.Stop()
         elif to == 'here':
             self.mush.Execute('where')  # call the alias 'where' in ModuleWhere
@@ -176,6 +177,18 @@ class ModuleRunto(Module):
                     self.mush.Error("module [runto]：didn't arrive the destination {}, actual {}, please fix it manually".format(self.destination_name, self._triRoomName.roomname))
                     self.mush.Execute('response gps fail')
                     self._doEvent('AfterFail')
+        # add timeout for CmdWalkDirection, to prevent "npc-block-direction" to halt the whole script. 
+        # add failcheck for CmdWalkDirection, to prevent incorrect map db path.
+        elif (args.state == CommandState.Timeout) or (args.state == CommandState.Failed):
+            if self._retry_times < 1:
+                # 新增加的重试，未测试是否存在问题
+                self._retry_times += 1
+                self.mush.Log('module [runto]：命令执行超时未到达目的地：{}，当前地点{}。准备再试一次'.format(self.destination_name, self._triRoomName.roomname))
+                self.owner.RunModule('randmove', afterDone=self._check_start_location)
+            else:
+                self.mush.Error("module [runto]：didn't arrive the destination {}, actual {}, please fix it manually".format(self.destination_name, self._triRoomName.roomname))
+                self.mush.Execute('response gps fail')
+                self._doEvent('AfterFail')
     
     def _run_path(self, path):
         ''' 行走路径 实现 '''
@@ -267,6 +280,5 @@ class ModuleRunto(Module):
         
         self.AfterDone = None
         self.AfterFail = None
-        
-        self.mush.Warning('module [runto]：abort manually!')
+
         self._doEvent('AfterStop')   

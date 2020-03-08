@@ -22,7 +22,7 @@ class CmdRoom(MudCommand):
             TriggerDefinition('room_relation', r'^[>]*\s{10,}(\S+)\s+$', '_onRelationTrigger', 1),
             TriggerDefinition('room_desc', r'^\s{0,9}(\S+)\s*$', '_onDescTrigger', 1),
             TriggerDefinition('room_weather', r'^\s*「(.*)」: (.*)$', '_onWeatherTrigger', 1),
-            TriggerDefinition('room_exits', r'\s*这里(?:明显|唯一)的(?:出口|方向)(?:是|有)(.*)$|^\s*这里没有任何明显的(?:出路|方向|出口)\w*|^\s*你可以看看\(look\):guancai\?,picture$|^\s*你可以看看\(look\):剑,sword$|^\s*这里没有任何明显的出口。$', '_onSuccess', 1),
+            TriggerDefinition('room_exits', r'\s*这里(?:明显|唯一)的(?:出口|方向)(?:是|有)(.*)$|^\s*这里没有任何明显的(?:出路|方向|出口)\。$', '_onSuccess', 1),
             TriggerDefinition('room_retry', r'^(> |)风景要慢慢的看\w*', '_onRetry', 1),
             )
     

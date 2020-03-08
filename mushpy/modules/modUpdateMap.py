@@ -19,14 +19,19 @@ class ModuleUpdateMap(Module):
         self._commands["room"] = owner.Commands["room"]
 
         self._triResponse = owner.Triggers["response"]
-        self._triResponse.AddCallback(self._response_updatemap)
+
         #self._triResponse = TriggerResponse(self.modulename, self._response_updatemap, name='cmdend')
         
         # create the alias for user.
-        self._alias = Alias(self, self._group, r'^updatemap$', self._aliasFunction, name='updatemap')
+        self._alias = Alias(self, self._group, r'^updatemap(\sstop)?$', self._aliasFunction, name='updatemap')
     
     def _aliasFunction(self, sender, args):
-        self.Start()
+        cmd = args.line
+        if cmd == "updatemap":
+            self.Start()
+        elif cmd == "updatemap stop":
+            self.mush.Log("Stop module [updatemap]!")
+            self.Stop()
         
     def _main_loop(self):
         # configuration commands and 
@@ -38,6 +43,7 @@ class ModuleUpdateMap(Module):
         self.mush.Log('module [updatemap]: rooms count: %d' % len(self._rooms))
         
         self.mush.Execute('set brief 3')
+        self._update_count = 0
         
         for idx in range(len(self._rooms)):
             link = self._path[idx]
@@ -77,18 +83,19 @@ class ModuleUpdateMap(Module):
                 self._commands["room"].Execute('look') 
                 sender, args = yield
                 if args.state == CommandState.Success:
-                    mudroom = sender.result["room"]
+                    mudroom = args.result["room"]
                     dbroom = self._map.GetRoomInfo(roomid)
                     if mudroom.Name.find('泥人') >= 0:
                         pass
                     elif dbroom.name == mudroom.Name:
                         self._map.UpdateRoom(roomid, mudroom)
+                        self._update_count += 1
                         self.mush.Log('module [updatemap]: update room (ID: {}) ok!'.format(roomid))
                     else:
                         self.mush.Error('module [updatemap]: 此处地名与数据库地名不一致，可能是走路时被拦住了，此处地图请手动尝试')
                         raise StopIteration
                 else:
-                    print('命令执行失败')
+                    self.mush.Error('命令执行失败')
                     raise StopIteration
                 
                 self._rooms_updated.append(roomid)
@@ -113,7 +120,7 @@ class ModuleUpdateMap(Module):
                     
                 self._triResponse.RemoveCallback(self._response_updatemap)
                 
-                self.mush.Log('module [updatemap]: all rooms updated')
+                self.mush.Log('module [updatemap]: all rooms updated, total count: {}'.format(self._update_count))
                 self.mush.Execute('set brief 1')
 
     def _pushCoroutine(self, sender, args):
@@ -143,7 +150,9 @@ class ModuleUpdateMap(Module):
             self._rooms = self._update_traversal.rooms
             self._rooms_updated = []
             
+            self._triResponse.AddCallback(self._response_updatemap)
             # create coroutine and start
+
             self._coroutine = self._main_loop()
             self._coroutine.send(None)
         else:
@@ -151,4 +160,11 @@ class ModuleUpdateMap(Module):
     
     def Start(self, **options):
         self.owner.RunModule('where', afterDone=self._after_know_where)
-        pass
+    
+    def Stop(self, **options):
+        try:
+            self._coroutine.send(StopIteration)
+        except StopIteration:
+            self.mush.Log("module [updatemap] stop successfully")
+            
+        

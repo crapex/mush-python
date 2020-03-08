@@ -3,6 +3,8 @@
 from .job import Job, TriggerDefinition, CommandState
 
 class JobMurong(Job):
+    JOB_NAME = '慕容信件'
+    
     _initTriList = (
         TriggerDefinition("reaskjob", r"^[> ]*仆人对着你摇了摇头说：「你刚做过任务，先去休息休息吧。」$", "_reaskjob", 1),
         TriggerDefinition("getjob", r"^[> ]*仆人叹道：家贼难防，有人偷走了少爷的信件，据传曾在『(.*)』附近出现，你去把它找回来吧！$", "_getjob", 1),
@@ -11,12 +13,12 @@ class JobMurong(Job):
         TriggerDefinition("nofight", r"^[> ]*这里(不准|禁止)战斗。$", "_nofight", 1),
         TriggerDefinition("npcdead", r"^[> ]*慕容世家(家贼|内鬼)死了。$", "_npcdead", 1),
         TriggerDefinition("npcweapon", r"^[> ]*慕容世家.*「唰」的丿声抽出一把.*握在手中。|^[> ]*一道青光闪过，慕容世家.*手中已多了把.", "_npcweapon", 1),
+        TriggerDefinition("imbusy", r"^[> ]*你正忙着呢！", "_nofight", 1),
+        TriggerDefinition("walktofast", r"^[> ]*这里没有 jiazei。", "_searchagain", 1),
         )
     
     def __init__(self, owner, name='mr', **options):
         super().__init__(owner, name, **options)
-        
-        self.job = "慕容信件"
 
         self._npcname = '%s发现的\s*慕容世家(内鬼|家贼)' % self._playername
         self._npcid = "%s's murong jiazei" % self._playerid
@@ -33,7 +35,12 @@ class JobMurong(Job):
         self._searchnpc()
         
     def _searchnpc(self):
+        self._triggers['npcdead'].Enabled = True
         self.owner.RunModule('searchnpc', afterDone=self._npcfound, afterFail=self._npc_notfound, to=self.location, npcname=self._npcname, npcid=self._npcid)
+    
+    def _searchagain(self, sender, args):
+        self._triggers['npcdead'].Enabled = True
+        self.owner.RunModule('searchnpc', afterDone=self._npcfound, afterFail=self._npc_notfound, npcname=self._npcname, npcid=self._npcid)        
     
     def _reaskjob(self, sender, args):
         self.mush.DoAfter(5, 'ask pu about job')
@@ -43,9 +50,11 @@ class JobMurong(Job):
         pass
     
     def _npcfound(self, sender, args):
+        self.owner.StopModule("runto")
+        self.owner.StopModule("searchnpc")
+        self._triggers["imbusy"].Enabled = True
         self.mush.Execute('follow jiazei')
         self.mush.Execute('ka jiazei')
-        self._triggers['npcdead'].Enabled = True
         
     def _npc_notfound(self, sender, args):
         self.mush.InfoClear()
@@ -57,6 +66,8 @@ class JobMurong(Job):
         self.mush.DoAfter(1, 'killall jiazei')
 
     def _npcdead(self, sender, args):
+        self._triggers['npcdead'].Enabled = False
+        self._triggers["imbusy"].Enabled = False
         self.mush.Execute('get all from corpse')
         self._cmdWait.AfterDone = self._waitforidle
         self._cmdWait.Wait(2)
@@ -67,7 +78,6 @@ class JobMurong(Job):
         if args.state == CommandState.Success:
             self._cmdWait.AfterDone = None
             self.mush.Execute('get all from corpse')
-            self._triggers['npcdead'].Enabled = False
             self.owner.RunModule('sellthings', afterDone=self._aftersellall)
     
     def _aftersellall(self, mod, args):
@@ -96,6 +106,7 @@ class JobMurong(Job):
             self.owner.RunModule('food', afterDone=self._afterfood)          
 
     def _jobfail(self, mod, args):
+        self._triggers['npcdead'].Enabled = False
         self.failure += 1
         self.total += 1
         self.mush.InfoClear()
@@ -122,8 +133,7 @@ class JobMurong(Job):
                 tri.Enabled = False
             self.mush.Log('任务：【慕容信件】 已被手动停止')
         elif param == 'fail':    
-            # self._gps.RunModule('runto', afterDone = self._jobfail, to = "mrf")
-            pass
+            self.owner.RunModule('runto', afterDone = self._jobfail, to = "mrf")
         elif param == 'where':
             self.mush.Log('慕容家贼在以下位罿: {}'.format(self.location))
         elif param == 'done':

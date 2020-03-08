@@ -4,6 +4,8 @@ from ..objects import MushObject, Alias, Trigger, Timer
 from ..commands import TriggerDefinition, CommandState
 
 class Job(MushObject):
+    JOB_NAME = 'NONE'
+    
     _initTriList = ()
     
     def __init__(self, owner, name, **options):

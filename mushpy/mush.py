@@ -3,7 +3,7 @@
 import math
 import re
 from datetime import datetime
-
+from .const import Returns
 
 class MushHelper:
     '''
@@ -112,16 +112,21 @@ class MushHelper:
         '''
         if typename.lower() == "trigger":
             if name in self._trigger_functions:
-                self.DeleteTrigger(name)
-                del self._trigger_functions[name]
+                res = self._world.DeleteTrigger(name)
+                if res == Returns.eOK:
+                    del self._trigger_functions[name]
+                elif res == Returns.eItemInUse:
+                    self.Error('The trigger {} is in using!'.format(name))
         elif typename.lower() == "alias":
             if name in self._alias_functions:
-                self.DeleteAlias(name)
-                del self._alias_functions[name]
+                res = self._world.DeleteAlias(name)
+                if res == Returns.eOK:
+                    del self._alias_functions[name]
         elif typename.lower() == "timer":
             if name in self._timer_functions:
-                self.DeleteTimer(name)
-                del self._timer_functions[name]
+                res = self._world.DeleteTimer(name)
+                if res == Returns.eOK:
+                    del self._timer_functions[name]
         else:
             raise KeyError('only allowed: trigger, alias or timer.')
     

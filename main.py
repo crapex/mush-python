@@ -6,12 +6,6 @@ _MODULE_PATH_ = r'D:\Programming\liclipse\mushclient'
 if not _MODULE_PATH_ in sys.path:
     sys.path.append(_MODULE_PATH_)
 
-import mushpy.commands.mudCmdRoom
-reload(mushpy.commands.mudCmdRoom)
-
-import mushpy.modules.modRandomMove
-reload(mushpy.modules.modRandomMove)
-
 import mushpy.player
 reload(mushpy.player)
 

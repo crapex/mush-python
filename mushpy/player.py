@@ -47,8 +47,10 @@ class Player(MushObject):
         "runto"     : ModuleRunto,
         "searchnpc" : ModuleSearchNPC,
         "updatemap" : ModuleUpdateMap,
+        "mapmisc"   : ModuleMapMisc,
         
         "dazuoto"   : ModuleDazuoTo,
+        "tunato"    : ModuleTunaTo,
         "liaoshang" : ModuleHeal,
         "savemoney" : ModuleSaveMoney,
         "sellthings" : ModuleSellThings,
@@ -68,7 +70,7 @@ class Player(MushObject):
         self._mushHelper = MushHelper(world, ax)                                # the mushhelper
         self._rootPath = self._mushHelper.GetInfo(56) 
         self._mapdbname = r"{}map.db".format(self._rootPath)
-        self.mush.Log('map db: ' + self._mapdbname)
+
         self._map = Map(self._mapdbname)                                        # the map for db
         
         self._options = options
@@ -92,17 +94,17 @@ class Player(MushObject):
         for name, modclass in self._modulesLoaded.items():
             self._loadModule(name, modclass)
             
-        self._aliases['score'] = Alias(self, 'player', r'^sc$', self._buildinCmd, name='score') 
-        self._aliases['skills'] = Alias(self, 'player', r'^cha$', self._buildinCmd, name='skills') 
-        self._aliases['enable'] = Alias(self, 'player', r'^jifa$', self._buildinCmd, name='enable')    
-        self._aliases['inventory'] = Alias(self, 'player', r'^i1$', self._buildinCmd, name='inventory')
+        self._aliases['score'] = Alias(self, 'player', r'^sc$', self._builtInCmd, name='score') 
+        self._aliases['skills'] = Alias(self, 'player', r'^cha$', self._builtInCmd, name='skills') 
+        self._aliases['enable'] = Alias(self, 'player', r'^jifa$', self._builtInCmd, name='enable')    
+        self._aliases['inventory'] = Alias(self, 'player', r'^i1$', self._builtInCmd, name='inventory')
         
         self._aliases['drawall'] = Alias(self, 'player', r'^ddd$', self._drawAll, name="drawall")
         
         for name in self._commandAliases.keys():
             self._aliases[name] = Alias(self, 'player', '^{}(\s\S+)?$'.format(name), self._simpleCmd, name = name)
     
-    def _buildinCmd(self, sender, args):
+    def _builtInCmd(self, sender, args):
         cmd = args.name[7:]  # the actual alias name is player_xxxx, because the group name is "player"
         self._commands[cmd].Execute()
     
@@ -157,9 +159,9 @@ class Player(MushObject):
     
     def _loadJobs(self, name, jobclass):
         if issubclass(jobclass, Job):
-            self.mush.Info("Loading job {} ...".format(repr(jobclass)))
+            self.mush.Info("Loading job 【{}】{} ...".format(jobclass.JOB_NAME, repr(jobclass)))
             self._modules[name] = jobclass(self)
-            self.mush.Info('【{}】done!\n'.format(self._modules[name].job))
+            self.mush.Info('done!\n')
         else:
             self.mush.Error('The class: {} is not a valid Job'.format(repr(jobclass)))
           

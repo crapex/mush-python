@@ -7,7 +7,7 @@ import pickle
 import sqlite3
 
 DBRoom = namedtuple('DBRoom', ['id', 'name', 'relation', 'description', 'exits', 'city', 'zone', 'alias', 'alias2', 'type'])
-DBRoomLink = namedtuple('DBRoomLink', ['linkfrom', 'linkto', 'path', 'time', 'money', 'city', 'name', 'roomtype']) 
+DBRoomLink = namedtuple('DBRoomLink', ['linkid', 'linkfrom', 'linkto', 'path', 'time', 'money', 'city', 'name', 'roomtype']) 
 
 
 class Map:
@@ -58,7 +58,11 @@ class Map:
         else:
             sql = 'insert into rooms (RoomName, RoomRelation, RoomDescription, RoomExits) values (?, ?, ?, ?)'
             cur.execute(sql, (mudroom.Name, mudroom.Relation, mudroom.Description, mudroom.Exit))
+            
         self._db.commit()
+        cur.execute('select last_insert_rowid()')
+        res_row = cur.fetchone()       
+        return res_row[0]
     
     def UpdateRoom(self, id, mudroom):
         sql = 'update rooms set RoomName = ?, RoomRelation = ?, RoomDescription = ?, RoomExits = ? where RoomID = ?'
@@ -76,6 +80,15 @@ class Map:
         cur = self._db.cursor()
         sql = 'insert into links (LinkFrom, LinkTo, LinkPath, TimeCost, MoneyCost) values (?,?,?,?,?)'
         cur.execute(sql, (frm, to, path, time, money))
+        self._db.commit()
+        cur.execute('select last_insert_rowid()')
+        res_row = cur.fetchone()       
+        return res_row[0]
+    
+    def DeleteLink(self, id):
+        cur = self._db.cursor()
+        sql = 'delete from links where LinkID =?'
+        cur.execute(sql, (id,))
         self._db.commit()
     
     def _RoomsByFilter(self, filter, *args):
@@ -163,7 +176,7 @@ class Map:
     
     def FindRoomLinks(self, id):
         cur = self._db.cursor()
-        cur.execute('select distinct a.LinkFrom, a.LinkTo, a.LinkPath, a.TimeCost, a.MoneyCost, b.RoomCity, b.RoomName, b.RoomType from links a, rooms b where b.RoomID = a.LinkTo and a.LinkFrom = ?', (id,))
+        cur.execute('select distinct a.LinkID, a.LinkFrom, a.LinkTo, a.LinkPath, a.TimeCost, a.MoneyCost, b.RoomCity, b.RoomName, b.RoomType from links a, rooms b where b.RoomID = a.LinkTo and a.LinkFrom = ?', (id,))
         
         links = list()
         for link in cur.fetchall():
