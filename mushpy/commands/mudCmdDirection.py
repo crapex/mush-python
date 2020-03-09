@@ -28,6 +28,7 @@ class CmdWalkDirection(MudCommand):
     
     def _onRetry(self, sender, args):
         #self.ResetTimeout(1)                    # add 1 second for timeout
+        self._timerout.Reset()                  # reset timeout for each retry
         self.mush.DoAfter(2, self._command)     # DoAfter, retry the direction after 2 second
         
     def _beforeExecute(self, **params):

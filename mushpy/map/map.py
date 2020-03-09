@@ -241,6 +241,15 @@ class Map:
         
         return DBRoom(*row)
     
+    def GetLinkInfo(self, id):
+        cur = self._db.cursor()
+        cur.execute('select distinct a.LinkID, a.LinkFrom, a.LinkTo, a.LinkPath, a.TimeCost, a.MoneyCost, b.RoomCity, b.RoomName, b.RoomType from links a, rooms b where a.LinkID = ?', (id,))
+        
+        row = cur.fetchone()
+        cur.close()
+        
+        return DBRoomLink(*row)
+    
     def FindPathOrigin(self, fromID, toIdOrType=None, toType=None, costType='time'):
         MAX_COST = 99999
 

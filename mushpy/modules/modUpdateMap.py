@@ -23,22 +23,31 @@ class ModuleUpdateMap(Module):
         #self._triResponse = TriggerResponse(self.modulename, self._response_updatemap, name='cmdend')
         
         # create the alias for user.
-        self._alias = Alias(self, self._group, r'^updatemap(\sstop)?$', self._aliasFunction, name='updatemap')
+        self._alias = Alias(self, self._group, r'^updatemap(?:\s(\S+))?$', self._aliasFunction, name='updatemap')
     
     def _aliasFunction(self, sender, args):
         cmd = args.line
         if cmd == "updatemap":
             self.Start()
-        elif cmd == "updatemap stop":
-            self.mush.Log("Stop module [updatemap]!")
-            self.Stop()
+        else:
+            param = args.wildcards[0]
+            if param == "stop":
+                self.mush.Log("Stop module [updatemap]!")
+                self.Stop()
+            elif param.isdigit():
+                self.Start(deep=int(param))
+                
         
     def _main_loop(self):
         # configuration commands and 
         for cmd in self._commands.values():
             cmd.AfterDone = self._pushCoroutine
         
-        self.mush.Log('module [updatemap]: start to update rooms in map database...')
+        if self._wholecity:
+            self.mush.Log('module [updatemap]: start to update rooms of whole city in map database...')
+        else:
+            self.mush.Log('module [updatemap]: start to update rooms with traverse deep ' + self._deep)
+            
         self.mush.Log('module [updatemap]: path length: %d' % len(self._path))
         self.mush.Log('module [updatemap]: rooms count: %d' % len(self._rooms))
         
@@ -144,7 +153,7 @@ class ModuleUpdateMap(Module):
         dbrooms = args.result["dbrooms"]
         if len(dbrooms) == 1:
             self._update_start_room = dbrooms[0]
-            self._update_traversal = self._map.FindTraversal(self._update_start_room.id, wholecity=True, deep=0)
+            self._update_traversal = self._map.FindTraversal(self._update_start_room.id, wholecity = self._wholecity, deep = self._deep)
             
             self._path = self._update_traversal.path
             self._rooms = self._update_traversal.rooms
@@ -159,6 +168,15 @@ class ModuleUpdateMap(Module):
             self.mush.Error("module [updatemap]: Can't start from an uncertain location, please use 'rt here' to check and retry.")
     
     def Start(self, **options):
+        # settings:
+        #   if hasn't deep param, the updatemap should update all rooms in the city
+        #   else only traverse the desinative deep.
+         
+        self._deep = options.get("deep", 0)
+        if self._deep == 0:
+            self._wholecity = True
+        else:
+            self._wholecity = False
         self.owner.RunModule('where', afterDone=self._after_know_where)
     
     def Stop(self, **options):
